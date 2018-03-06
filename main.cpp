@@ -4,9 +4,22 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
  
-int main()
+#include <sstream>
+
+
+int main(int argc, char**argv)
 {
- 
+    int index_drop=25;
+    vector<int> cap_drop_vec;
+    vector<int> cap_count_vec;
+    if(argc>=2)
+    {
+      stringstream ss;
+      ss<<argv[1];
+      cout<<"ss:"<<ss.str()<<endl;
+      ss>>index_drop;
+      //index_drop=argv[1];
+    }
                 printf("%s\n", "begin");
     //IP camera URLs
     // vector<string> capture_source = {
@@ -26,6 +39,14 @@ int main()
         "/storage2/liushuai/work_code/camera/build/DJI_0008.MOV"
     };
 string output_dir="/storage2/liushuai/work_code/camera/build/test/";
+      cout<<"index_drop:"<<index_drop<<endl;
+    cap_drop_vec.clear();
+    cap_count_vec.clear();
+    for (int i = 0; i < capture_source.size(); i++)
+    {
+      cap_drop_vec.push_back(index_drop);
+      cap_count_vec.push_back(index_drop);
+    }
     //USB Camera indices
     vector<int> capture_index = { 0, 1 };
  
@@ -40,8 +61,9 @@ string output_dir="/storage2/liushuai/work_code/camera/build/test/";
     //Make an instance of CameraStreamer
                 printf("%s\n", "1");
     CameraStreamer cam(capture_source);
+  long long totalframes = cam.camera_capture[0]->get(CAP_PROP_FRAME_COUNT);
  
-                printf("%s\n", "2");
+                printf("totalframes %lld\n", totalframes);
 unsigned  int ii=0;
 unsigned  int j=0;
 unsigned  int k=0;
@@ -56,6 +78,21 @@ unsigned  int z=0;
                 printf("%s\n", "try_pop");
             if (cam.frame_queue[i]->try_pop(frame))
             {
+                totalframes--;
+                if(totalframes<=0)
+                {
+                    cout<<"pic over"<<endl;
+                    return 0;
+                }
+              if(cap_count_vec[i]%cap_drop_vec[i] !=0)
+              {
+                  cap_count_vec[i]=(cap_count_vec[i]+1)%cap_drop_vec[i];
+                  continue;
+              }
+              int fps = cam.camera_capture[i]->get(CAP_PROP_FPS);
+              cout<<i<<"vedio fps:"<<fps<<endl;
+              cout<<i<<"vedio drop count:"<<cap_drop_vec[i]<<endl;
+              cap_count_vec[i]=(cap_count_vec[i]+1)%cap_drop_vec[i];
                     //Show frame on Highgui window
                     //imshow(label[i], frame);
                 //printf("%s\n", "pop");
