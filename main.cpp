@@ -14,17 +14,30 @@ int main(int argc, char**argv)
     vector<int> cap_drop_vec;
     vector<int> cap_count_vec;
     vector<long long> cap_whole_frame;
-    if(argc>=3)
+    string filename="";
+    string dirname="";
+    if(argc>=5)
     {
       stringstream ss;
       ss<<argv[1];
       cout<<"ss:"<<ss.str()<<endl;
       ss>>index_drop;
+
       stringstream ss1;
       ss1<<argv[2];
       cout<<"argv 2:"<<ss1.str()<<endl;
       ss1>>iey_max_frame;
+
+
+      stringstream ss2;
+      ss2<<argv[3];
+      cout<<"argv 3:"<<ss2.str()<<endl;
+      ss2>>filename;
       //index_drop=argv[1];
+      stringstream ss3;
+      ss3<<argv[4];
+      cout<<"argv 4:"<<ss3.str()<<endl;
+      ss3>>dirname;
     }
                 printf("%s\n", "begin");
     //IP camera URLs
@@ -41,13 +54,18 @@ int main(int argc, char**argv)
         // "/storage2/public/Surveilliance/zhongshan_dface/20170601/Network Video Recorder_27.42.165.79_2_20170601174352_20170601181908_1496425474706.mp4"
    
         //"/storage2/liushuai/work_code/camera/build/1.mp4",
+      string filepath="/storage2/liushuai/work_code/camera/build/";
+      string str1 = filepath + filename;
     vector<string> capture_source = {
-        "/storage2/liushuai/work_code/camera/build/DJI_00026.MOV"
+        str1
     };
 
     CameraStreamer cam(capture_source,index_drop,iey_max_frame);
 
-string output_dir="/storage2/liushuai/work_code/camera/build/pic/test26/";
+string output_dir="/storage2/liushuai/work_code/camera/build/pic/test";
+output_dir= output_dir+dirname;
+output_dir= output_dir+"/";
+      cout<<"output_dir:"<<output_dir<<endl;
       cout<<"index_drop:"<<index_drop<<endl;
     cap_drop_vec.clear();
     cap_count_vec.clear();
@@ -56,9 +74,9 @@ string output_dir="/storage2/liushuai/work_code/camera/build/pic/test26/";
     {
       cap_drop_vec.push_back(index_drop);
       cap_count_vec.push_back(index_drop);
-    long long totalframes = cam.camera_capture[i]->get(CAP_PROP_FRAME_COUNT);
-      cap_whole_frame.push_back(totalframes);
+     int totalframes = cam.camera_capture[i]->get(CAP_PROP_FRAME_COUNT);
       int fps = cam.camera_capture[i]->get(CAP_PROP_FPS);
+      cap_whole_frame.push_back(totalframes/index_drop);
       printf("totalframes %lld fps %d \n", totalframes,fps);
     }
     //USB Camera indices
@@ -133,4 +151,5 @@ unsigned  int z=0;
             }
         }
     }
+      cout<<"main over:"<<endl;
 }

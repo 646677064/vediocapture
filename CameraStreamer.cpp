@@ -43,6 +43,7 @@ CameraStreamer::CameraStreamer(vector<string> stream_source,int intervaldrop,int
 
 CameraStreamer::~CameraStreamer()
 {
+	cout<<" ~CameraStreamer over===1"<<endl;
 	stopMultiCapture();
 	cout<<" ~CameraStreamer over==="<<endl;
 }
@@ -78,19 +79,33 @@ void CameraStreamer::captureFrame(int index)
           	sleep(2);
           	continue;
           }
-        //Pop frame from queue and check if the frame is valid
-          if(count_sum%intervaldrop !=0)
-          {
-              count_sum=(count_sum+1)%intervaldrop;
-              continue;
-          }
-          count_sum=(count_sum+1)%intervaldrop;
-
 		Mat frame;
 		//Grab frame from camera capture
 		(*capture) >> frame;
-		//Put frame to the queue
-		frame_queue[index]->push(frame);
+        //Pop frame from queue and check if the frame is valid
+		long long totalframes = capture->get(CAP_PROP_FRAME_COUNT);
+    	long long frame_pos = capture->get(cv::CAP_PROP_POS_FRAMES);
+
+		cout<<totalframes<<" test=========="<<frame_pos<<" "<<endl;
+    	if (frame_pos >= totalframes)
+    	{
+				frame.release();
+    		return;
+    	}
+          if(count_sum%intervaldrop !=0)
+          {
+              count_sum=(count_sum+1)%intervaldrop;
+			//relase frame resource
+				frame.release();
+              continue;
+          }
+          else
+          {
+			//Put frame to the queue
+			frame_queue[index]->push(frame);
+          	count_sum=(count_sum+1)%intervaldrop;
+          }
+
 		//relase frame resource
 		frame.release();
 	}
@@ -147,7 +162,9 @@ void CameraStreamer::stopMultiCapture()
 		}
 
 		thread *t=camera_thread[i];
+	cout<<" ~join over===1"<<endl;
 		t->join();
+	cout<<" ~join over===2"<<endl;
 		delete t;
 		t=NULL;
 		camera_thread[i]=NULL;
