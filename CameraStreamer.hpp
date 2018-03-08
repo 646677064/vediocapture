@@ -31,12 +31,16 @@ vector<thread*> camera_thread;
  
 //Constructor for IP Camera capture
 CameraStreamer(vector<string> source);
+CameraStreamer(vector<string> source,int intervaldrop,int imax_keep_frame);
 //Constructor for USB Camera capture
 CameraStreamer(vector<int> index);
 //Destructor for releasing resource(s)
 ~CameraStreamer();
  
 private:
+	int m_intervaldrop;
+	int m_keepframe;
+	bool m_brun;
 bool isUSBCamera;
 int camera_count;
 //initialize and start the camera capturing process(es)
